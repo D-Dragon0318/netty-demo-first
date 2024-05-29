@@ -21,23 +21,36 @@ public class TestByteBufferExam {
         source.put("Hello,world\nI'm zhangsan\nHo".getBytes());
         split(source);
         source.put("w are you?\n".getBytes());
+        System.out.println("---------------------second-----------------------------------------");
         split(source);
     }
 
     private static void split(ByteBuffer source) {
         source.flip();
+        StringBuilder sum = new StringBuilder();
         for (int i = 0; i < source.limit(); i++) {
             // 找到一条完整消息
-            if (source.get(i) == '\n') {
+            if (source.get(i) == '\n') {//在11的时候是换行符
+                //加一是为了接收换行符
                 int length = i + 1 - source.position();
                 // 把这条完整消息存入新的 ByteBuffer
                 ByteBuffer target = ByteBuffer.allocate(length);
+                System.out.println("+--------+-----------------source-before--------------------------+---------+");
+                debugAll(source);
+                System.out.println("position: "+source.position());
                 // 从 source 读，向 target 写
                 for (int j = 0; j < length; j++) {
+                    //get()会移动position
                     target.put(source.get());
                 }
+                System.out.println("+--------+-----------------source-after--------------------------+----------+");
+                debugAll(source);
+                System.out.println("position: "+source.position());
+                System.out.println("+--------+--------------------target-----------------------+----------------+");
                 debugAll(target);
             }
+            sum = source.get(i) == '\n' ? new StringBuilder() :sum.append((char) source.get(i));
+            System.out.println(source +" i: " +i + " "+sum);
         }
         source.compact();
     }
