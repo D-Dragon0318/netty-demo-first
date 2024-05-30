@@ -700,22 +700,79 @@ public static void main(String[] args) {
 }
 
 private static void split(ByteBuffer source) {
-    source.flip();
-    int oldLimit = source.limit();
-    for (int i = 0; i < oldLimit; i++) {
-        if (source.get(i) == '\n') {
-            System.out.println(i);
-            ByteBuffer target = ByteBuffer.allocate(i + 1 - source.position());
-            // 0 ~ limit
-            source.limit(i + 1);
-            target.put(source); // 从source 读，向 target 写
-            debugAll(target);
-            source.limit(oldLimit);
+        source.flip();
+        StringBuilder sum = new StringBuilder();
+        for (int i = 0; i < source.limit(); i++) {
+            // 找到一条完整消息
+            if (source.get(i) == '\n') {//在11的时候是换行符
+                //加一是为了接收换行符
+                int length = i + 1 - source.position();
+                // 把这条完整消息存入新的 ByteBuffer
+                ByteBuffer target = ByteBuffer.allocate(length);
+                System.out.println("+--------+-----------------source-before--------------------------+---------+");
+                debugAll(source);
+                System.out.println("position: "+source.position());
+                // 从 source 读，向 target 写
+                for (int j = 0; j < length; j++) {
+                    //get()会移动position
+                    target.put(source.get());
+                }
+                System.out.println("+--------+-----------------source-after--------------------------+----------+");
+                debugAll(source);
+                System.out.println("position: "+source.position());
+                System.out.println("+--------+--------------------target-----------------------+----------------+");
+                debugAll(target);
+            }
+            sum = source.get(i) == '\n' ? new StringBuilder() :sum.append((char) source.get(i));
+            System.out.println(source +" i: " +i + " "+sum);
         }
+        source.compact();
     }
-    source.compact();
-}
 ```
+
+```java
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 0 H
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 1 He
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 2 Hel
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 3 Hell
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 4 Hello
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 5 Hello,
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 6 Hello,w
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 7 Hello,wo
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 8 Hello,wor
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 9 Hello,worl
+java.nio.HeapByteBuffer[pos=0 lim=27 cap=32] i: 10 Hello,world
++--------+-----------------source-before--------------------------+---------+
++--------+-------------------- all ------------------------+----------------+
+position: [0], limit: [27]
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 48 65 6c 6c 6f 2c 77 6f 72 6c 64 0a 49 27 6d 20 |Hello,world.I'm |
+|00000010| 7a 68 61 6e 67 73 61 6e 0a 48 6f 00 00 00 00 00 |zhangsan.Ho.....|
++--------+-------------------------------------------------+----------------+
+position: 0
++--------+-----------------source-after--------------------------+----------+
++--------+-------------------- all ------------------------+----------------+
+position: [12], limit: [27]
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 48 65 6c 6c 6f 2c 77 6f 72 6c 64 0a 49 27 6d 20 |Hello,world.I'm |
+|00000010| 7a 68 61 6e 67 73 61 6e 0a 48 6f 00 00 00 00 00 |zhangsan.Ho.....|
++--------+-------------------------------------------------+----------------+
+position: 12
++--------+--------------------target-----------------------+----------------+
++--------+-------------------- all ------------------------+----------------+
+position: [12], limit: [12]
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 48 65 6c 6c 6f 2c 77 6f 72 6c 64 0a             |Hello,world.    |
++--------+-------------------------------------------------+----------------+
+```
+
+
 
 
 
@@ -735,7 +792,7 @@ private static void split(ByteBuffer source) {
 
 * 通过 FileInputStream 获取的 channel 只能读
 * 通过 FileOutputStream 获取的 channel 只能写
-* 通过 RandomAccessFile 是否能读写根据构造 RandomAccessFile 时的读写模式决定
+* 通过 RandomAccessFile 是否能读写根据构造 RandomAccessFile 时的读写模式决定 “r w”
 
 
 
