@@ -16,9 +16,12 @@ public class Server {
         // 1. 创建 selector, 管理多个 channel
         Selector selector = Selector.open();
         ServerSocketChannel ssc = ServerSocketChannel.open();
+        //切换非阻塞模式，使accept不阻塞
         ssc.configureBlocking(false);
         // 2. 建立 selector 和 channel 的联系（注册）
         // SelectionKey 就是将来事件发生后，通过它可以知道事件和哪个channel的事件
+        //interestOps 参数是 SelectionKey 中的标志位，表示你对这个通道感兴趣的事件
+        //attachment 对象。这个参数是一个 Object 类型，可以是任何对象，通常用于存储与该通道相关的额外信息
         SelectionKey sscKey = ssc.register(selector, 0, null);
         // key 只关注 accept 事件
         sscKey.interestOps(SelectionKey.OP_ACCEPT);
@@ -36,11 +39,12 @@ public class Server {
                 iter.remove();
                 log.debug("key: {}", key);
                 // 5. 区分事件类型
-                if (key.isAcceptable()) { // 如果是 accept
+                if (key.isAcceptable()) { // 如果是 accept就注册
                     ServerSocketChannel channel = (ServerSocketChannel) key.channel();
                     SocketChannel sc = channel.accept();
+                    //使read不阻塞
                     sc.configureBlocking(false);
-
+                    //这里的0表示不关心任何东西
                     SelectionKey scKey = sc.register(selector, 0, null);
                     scKey.interestOps(SelectionKey.OP_READ);
                     log.debug("{}", sc);
