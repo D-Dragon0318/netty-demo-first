@@ -1175,8 +1175,8 @@ System.out.println(end - start);
 #### 阻塞
 
 * 阻塞模式下，相关方法都会导致线程暂停
-  * ServerSocketChannel.accept 会在没有连接建立时让线程暂停
-  * SocketChannel.read 会在没有数据可读时让线程暂停
+  * ServerSocketChannel.accept 会在**没有连接建立**时让线程暂停
+  * SocketChannel.read 会在**没有数据可读**时让线程暂停
   * 阻塞的表现其实就是线程暂停了，暂停期间不会占用 cpu，但线程相当于闲置
 * 单线程下，阻塞方法之间相互影响，几乎不能正常工作，需要多线程支持
 * 但多线程下，有新的问题，体现在以下方面
@@ -1330,10 +1330,10 @@ SelectionKey key = channel.register(selector, 绑定事件);
 * channel 必须工作在非阻塞模式
 * FileChannel 没有非阻塞模式，因此不能配合 selector 一起使用
 * 绑定的事件类型可以有
-  * connect - 客户端连接成功时触发
-  * accept - 服务器端成功接受连接时触发
-  * read - 数据可读入时触发，有因为接收能力弱，数据暂不能读入的情况
-  * write - 数据可写出时触发，有因为发送能力弱，数据暂不能写出的情况
+  * connect - 客户端连接成功时触发 枚举值是6
+  * accept - 服务器端成功接受连接时触发 枚举值是8
+  * read - 数据可读入时触发，有因为接收能力弱，数据暂不能读入的情况 枚举值是1
+  * write - 数据可写出时触发，有因为发送能力弱，数据暂不能写出的情况 枚举值是4
 
 
 
@@ -1778,7 +1778,7 @@ public class WriteServer {
                     SocketChannel sc = ssc.accept();
                     sc.configureBlocking(false);
                     SelectionKey sckey = sc.register(selector, SelectionKey.OP_READ);
-                    // 1. 向客户端发送内容
+                    // 1. 向客户端发送内容(在第一次连接的时候服务器就发数据了)
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < 3000000; i++) {
                         sb.append("a");
@@ -1866,13 +1866,13 @@ public class WriteClient {
 
 > 现在都是多核 cpu，设计时要充分考虑别让 cpu 的力量被白白浪费
 
-
+后续补充
 
 前面的代码只有一个选择器，没有充分利用多核 cpu，如何改进呢？
 
 分两组选择器
 
-* 单线程配一个选择器，专门处理 accept 事件
+* 单线程配一个选择器，专门处理 accept 事件 （boss）
 * 创建 cpu 核心数的线程，每个线程配一个选择器，轮流处理 read 事件
 
 
@@ -2019,7 +2019,9 @@ public class ChannelDemo7 {
 > * Runtime.getRuntime().availableProcessors() 如果工作在 docker 容器下，因为容器不是物理隔离的，会拿到物理 cpu 个数，而不是容器申请时的个数
 > * 这个问题直到 jdk 10 才修复，使用 jvm 参数 UseContainerSupport 配置， 默认开启
 
-
+* ServerSocketChanne就像大船向码头伸出的甲板
+* SocketChannel就像在甲板上来回移动的装着货物的小车
+* 而货物就是信息
 
 ### 4.7 UDP
 
@@ -2089,7 +2091,7 @@ public class UdpClient {
 
 * stream 不会自动缓冲数据，channel 会利用系统提供的发送缓冲区、接收缓冲区（更为底层）
 * stream 仅支持阻塞 API，channel 同时支持阻塞、非阻塞 API，网络 channel 可配合 selector 实现多路复用
-* 二者均为全双工，即读写可以同时进行
+* 二者均为**全双工**，即读写可以同时进行
 
 
 
