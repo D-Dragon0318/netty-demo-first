@@ -44,8 +44,8 @@ Netty 在 Java 网络应用框架中的地位就好比：Spring 框架在 JavaEE
 ### 1.4 Netty 的优势
 
 * Netty vs NIO，工作量大，bug 多
-  * 需要自己构建协议
-  * 解决 TCP 传输问题，如粘包、半包
+  * 需要自己**构建协议**
+  * 解决 TCP **传输问题**，如粘包、半包
   * epoll 空轮询导致 CPU 100%
   * 对 API 进行增强，使之更易用，如 FastThreadLocal => ThreadLocal，ByteBuf => ByteBuffer
 * Netty vs 其它网络应用框架
@@ -55,6 +55,20 @@ Netty 在 Java 网络应用框架中的地位就好比：Spring 框架在 JavaEE
     * 3.x 2008
     * 4.x 2013
     * 5.x 已废弃（没有明显的性能提升，维护成本高）
+
+#### epoll空轮询
+
+> 使用多路复用时，不断调用epoll_wait函数检查文件描述符集合的状态，然后立即返回再再次调用，形成了一个快速循环
+
+* 危害：
+  * cpu占用率高
+  * 性能下降
+  * 功耗增加
+* 解决方案
+  * 合理设置超时时间
+  * 监控和调试
+
+
 
 
 
@@ -160,6 +174,8 @@ new Bootstrap()
 ### 2.4 流程梳理
 
 ![](img/0040.png)
+
+这里可以反复看视频来巩固https://www.bilibili.com/video/BV1py4y1E7oA?p=56&vd_source=40f76235f23875c4571124d977cda1c0
 
 #### 💡 提示
 

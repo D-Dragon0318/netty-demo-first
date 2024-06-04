@@ -3,7 +3,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-!**/src/test/java/com/asm/
+**/src/test/java/com/asm/
+**/black-horse-netty-master/
 
 ### STS ###
 .apt_generated
