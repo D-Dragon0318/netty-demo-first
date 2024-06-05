@@ -15,6 +15,27 @@ import java.net.InetSocketAddress;
 @Slf4j
 public class EventLoopClient {
     public static void main(String[] args) throws InterruptedException {
+        //1.启动类
+        Channel channel = new Bootstrap()
+                //2.添加EventLoop事件循环对象
+                .group(new NioEventLoopGroup())
+                //3.选择客户端的 ServerSocketChannel 实现
+                .channel(NioSocketChannel.class)
+                //4.添加处理器
+                .handler(new ChannelInitializer<NioSocketChannel>() {
+                    @Override // 在连接建立后被调用
+                    protected void initChannel(NioSocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(new StringEncoder());
+                    }
+                })
+                //5.连接到服务器
+                .connect(new InetSocketAddress("localhost", 8080))
+                .sync()
+                .channel();
+        System.out.println(channel);
+        System.out.println("");
+    }
+    /* public static void main(String[] args) throws InterruptedException {
         // 2. 带有 Future，Promise 的类型都是和异步方法配套使用，用来处理结果
         ChannelFuture channelFuture = new Bootstrap()
                 .group(new NioEventLoopGroup())
@@ -30,10 +51,10 @@ public class EventLoopClient {
                 .connect(new InetSocketAddress("localhost", 8080)); // 1s 秒后
 
         // 2.1 使用 sync 方法同步处理结果
-        /*channelFuture.sync(); // 阻塞住当前线程，直到nio线程连接建立完毕
+         *//*channelFuture.sync(); // 阻塞住当前线程，直到nio线程连接建立完毕
         Channel channel = channelFuture.channel();
         log.debug("{}", channel);
-        channel.writeAndFlush("hello, world");*/
+        channel.writeAndFlush("hello, world");*//*
 
         // 2.2 使用 addListener(回调对象) 方法异步处理结果
         channelFuture.addListener(new ChannelFutureListener() {
@@ -45,5 +66,5 @@ public class EventLoopClient {
                 channel.writeAndFlush("hello, world");
             }
         });
-    }
+    } */
 }

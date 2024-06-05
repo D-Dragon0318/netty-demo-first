@@ -225,6 +225,7 @@ EventLoopGroup 是一组 EventLoop，Channel 一般会调用 EventLoopGroup 的 
 ```java
 // 内部创建了两个 EventLoop, 每个 EventLoop 维护一个线程
 DefaultEventLoopGroup group = new DefaultEventLoopGroup(2);
+//NioEventLoopGroup不指定线程数则会默认使用当前系统核心数*2
 System.out.println(group.next());
 System.out.println(group.next());
 System.out.println(group.next());

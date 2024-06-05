@@ -25,21 +25,21 @@ public class HelloServer {
             .childHandler(
                 // 5. channel 代表和客户端进行数据读写的通道 Initializer 初始化，负责添加别的 handler
                 new ChannelInitializer<NioSocketChannel>() {
-                @Override
-                protected void initChannel(NioSocketChannel ch) throws Exception {
-                    // 6. 添加具体 handler
-                    ch.pipeline().addLast(new LoggingHandler());
-                    // 将 ByteBuf 转换为字符串
-                    ch.pipeline().addLast(new StringDecoder());
-                    // 自定义 handler
-                    ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
-                        @Override // 读事件
-                        public void channelRead(ChannelHandlerContext ctx,Object msg) throws Exception {
-                            System.out.println(msg); // 打印上一步转换好的字符串
-                            ctx.fireChannelRead(msg);//这里需要把接收到的数据放行给下一个handler
-                        }
-                    });
-                }
+                    @Override
+                    protected void initChannel(NioSocketChannel ch) throws Exception {
+                        // 6. 添加具体 handler
+                        ch.pipeline().addLast(new LoggingHandler());
+                        // 将 ByteBuf 转换为字符串
+                        ch.pipeline().addLast(new StringDecoder());
+                        // 自定义 handler
+                        ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+                            @Override // 读事件
+                            public void channelRead(ChannelHandlerContext ctx,Object msg) throws Exception {
+                                System.out.println(msg); // 打印上一步转换好的字符串
+                                ctx.fireChannelRead(msg);//这里需要把接收到的数据放行给下一个handler
+                            }
+                        });
+                    }
             })
             // 7. 绑定监听端口
             .bind(8080);

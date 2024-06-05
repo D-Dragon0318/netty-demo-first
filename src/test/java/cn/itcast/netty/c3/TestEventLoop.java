@@ -33,6 +33,7 @@ public class TestEventLoop {
         // 4. 执行定时任务
         group.next().scheduleAtFixedRate(() -> {
             log.debug("ok");
+            //延迟时间（0表示立即开始），周期时间，时间单位
         }, 0, 1, TimeUnit.SECONDS);
 
         log.debug("main");
