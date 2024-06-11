@@ -429,10 +429,13 @@ new ServerBootstrap()
 关键代码 `io.netty.channel.AbstractChannelHandlerContext#invokeChannelRead()`
 
 ```java
+//next表示处理链中的下一个处理器，msg是要传递给处理器的消息对象。
 static void invokeChannelRead(final AbstractChannelHandlerContext next, Object msg) {
+    //这里参数传入next是为了显示传递上下文对象
+    //返回的是更新过引用状态的消息体
     final Object m = next.pipeline.touch(ObjectUtil.checkNotNull(msg, "msg"), next);
     // 下一个 handler 的事件循环是否与当前的事件循环是同一个线程
-    EventExecutor executor = next.executor();
+    EventExecutor executor = next.executor();//返回下一个handler的eventloop
     
     // 是，直接调用
     if (executor.inEventLoop()) {
