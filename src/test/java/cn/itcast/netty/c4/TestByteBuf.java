@@ -8,8 +8,10 @@ import static io.netty.util.internal.StringUtil.NEWLINE;
 
 public class TestByteBuf {
     public static void main(String[] args) {
-
+        //默认直接
         ByteBuf buf = ByteBufAllocator.DEFAULT.buffer();
+        //class io.netty.buffer.PooledUnsafeDirectByteBuf
+        //池化不安全的直接内存
         System.out.println(buf.getClass());
         System.out.println(buf.maxCapacity());
         log(buf);
