@@ -1467,7 +1467,7 @@ public static boolean release(Object msg) {
 
 
 
-#### 9）slice
+#### 9）slice （逻辑切分）
 
 【零拷贝】的体现之一，对原始 ByteBuf 进行切片成多个 ByteBuf，切片后的 ByteBuf 并没有发生内存复制，还是使用原始 ByteBuf 的内存，切片后的 ByteBuf 维护独立的 read，write 指针
 
@@ -1580,7 +1580,7 @@ System.out.println(ByteBufUtil.prettyHexDump(origin));
 
 #### 10）duplicate
 
-【零拷贝】的体现之一，就好比截取了原始 ByteBuf 所有内容，并且没有 max capacity 的限制，也是与原始 ByteBuf 使用同一块底层内存，只是读写指针是独立的
+【零拷贝】的体现之一，就好比截取了原始 ByteBuf 所有内容，并且**没有 max capacity 的限制**，也是与原始 ByteBuf 使用同一块底层内存，只是<u>读写指针是独立的</u>
 
 ![](img/0012.png)
 
@@ -1588,7 +1588,7 @@ System.out.println(ByteBufUtil.prettyHexDump(origin));
 
 #### 11）copy
 
-会将底层内存数据进行深拷贝，因此无论读写，都与原始 ByteBuf 无关
+会将底层内存数据进行**深拷贝**，因此无论读写，都与原始 ByteBuf 无关
 
 
 
