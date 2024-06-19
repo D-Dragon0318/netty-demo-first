@@ -728,6 +728,9 @@ public class CloseFutureClient {
 
 * jdk Future 只能同步等待任务结束（或成功、或失败）才能得到结果
 * netty Future 可以同步等待任务结束得到结果，也可以异步方式得到结果，但都是要等任务结束
+
+jdk和netty中的Future是提交任务后自动返回的Future
+
 * netty Promise 不仅有 netty Future 的功能，而且脱离了任务独立存在，只作为**两个线程间传递结果的容器**
 
 | 功能/名称    | jdk Future                     | netty Future                                                 | Promise      |
