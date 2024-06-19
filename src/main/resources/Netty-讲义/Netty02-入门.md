@@ -602,6 +602,7 @@ ChannelFuture channelFuture = new Bootstrap()
     })
     .connect("127.0.0.1", 8080);
 System.out.println(channelFuture.channel()); // 1
+ // 在 nio 线程连接建立好之后，会调用 operationComplete
 channelFuture.addListener((ChannelFutureListener) future -> {
     System.out.println(future.channel()); // 2
 });
@@ -707,7 +708,7 @@ public class CloseFutureClient {
 
 
 
-因此可以做如下优化，只有一开始，医生 2、3、4 分别要等待 5、10、15 分钟才能执行工作，但只要后续病人源源不断地来，他们就能够满负荷工作，并且处理病人的能力提高到了 `4 * 8 * 12` 效率几乎是原来的四倍
+因此可以做如下优化，只有一开始，医生 2、3、4 分别要等待 5、10、15 分钟才能执行工作，但只要后续病人源源不断地来，他们就能够满负荷工作，并且处理病人的能力提高到了 `4 * 8 * 12` 效率几乎是原来的四倍 （指令流水线）
 
 ![](img/0047.png)
 
@@ -727,7 +728,7 @@ public class CloseFutureClient {
 
 * jdk Future 只能同步等待任务结束（或成功、或失败）才能得到结果
 * netty Future 可以同步等待任务结束得到结果，也可以异步方式得到结果，但都是要等任务结束
-* netty Promise 不仅有 netty Future 的功能，而且脱离了任务独立存在，只作为两个线程间传递结果的容器
+* netty Promise 不仅有 netty Future 的功能，而且脱离了任务独立存在，只作为**两个线程间传递结果的容器**
 
 | 功能/名称    | jdk Future                     | netty Future                                                 | Promise      |
 | ------------ | ------------------------------ | ------------------------------------------------------------ | ------------ |

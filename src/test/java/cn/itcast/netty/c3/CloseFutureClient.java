@@ -19,13 +19,15 @@ import java.util.Scanner;
 public class CloseFutureClient {
     public static void main(String[] args) throws InterruptedException {
         NioEventLoopGroup group = new NioEventLoopGroup();
+        //用来连接的channelFuture
         ChannelFuture channelFuture = new Bootstrap()
                 .group(group)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<NioSocketChannel>() {
                     @Override // 在连接建立后被调用
                     protected void initChannel(NioSocketChannel ch) throws Exception {
-//                        ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
+                        //netty中已经提供好了的
+                        ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
                         ch.pipeline().addLast(new StringEncoder());
                     }
                 })
@@ -48,12 +50,16 @@ public class CloseFutureClient {
 
         // 获取 CloseFuture 对象， 1) 同步处理关闭， 2) 异步处理关闭
         ChannelFuture closeFuture = channel.closeFuture();
-        /*log.debug("waiting close...");
+        /* //同步处理关闭
+        log.debug("waiting close...");
+        //阻塞在这里等待关闭完成后才会继续往下运行
         closeFuture.sync();
-        log.debug("处理关闭之后的操作");*/
+        log.debug("处理关闭之后的操作"); */
         System.out.println(closeFuture.getClass());
+        //关闭Channel的进程会来调用这个方法
         closeFuture.addListener((ChannelFutureListener) future -> {
             log.debug("处理关闭之后的操作");
+            //关闭时间循环对象组
             group.shutdownGracefully();
         });
     }
