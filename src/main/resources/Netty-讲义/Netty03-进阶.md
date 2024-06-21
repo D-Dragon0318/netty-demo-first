@@ -485,6 +485,11 @@ public class HelloWorldClient {
 
 #### 方法3，固定分隔符
 
+```java
+final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{'\r','\n'});// 客户端分隔符必须 "\r\n"
+ch.pipeline().addLast(new DelimiterBasedFrameDecoder(1024,buf)); // 超出1024报错
+```
+
 服务端加入，默认以 \n 或 \r\n 作为分隔符，如果超出指定长度仍未出现分隔符，则抛出异常
 
 ```java
@@ -832,7 +837,7 @@ TCP/IP 中消息传输基于流的方式，没有边界。
 例如，假设一个中文字符长度为 3，按照上述协议的规则，发送信息方式如下，就不会被接收方弄错意思了
 
 ```
-0f下雨天留客06天留09我不留
+0f下雨天留客06天留09我不留 f = 3 
 ```
 
 

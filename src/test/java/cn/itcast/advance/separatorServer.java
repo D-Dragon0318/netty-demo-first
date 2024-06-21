@@ -43,20 +43,17 @@ public class separatorServer {
 
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
-// head<<<<<<<<<
                     /*################################################*/
                     /*####                 行解码器                 ###*/
                     /*################################################*/
 //                    ch.pipeline().addLast(new LineBasedFrameDecoder(1024)); // 超出1024报错
 
-// =============
                     /*################################################*/
                     /*####            自定义定界符 帧解码器           ###*/
                     /*################################################*/
                     //upooled.wrappered将字节数组转为ByteBuf对象
                     final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{'\r','\n'});// 客户端分隔符必须 "\r\n"
                     ch.pipeline().addLast(new DelimiterBasedFrameDecoder(1024,buf)); // 超出1024报错
-// end>>>>>>>>>>
                     ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
 
 /*                    ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){
