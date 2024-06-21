@@ -17,6 +17,7 @@ import java.util.List;
 @ChannelHandler.Sharable
 public class MessageCodec extends ByteToMessageCodec<Message> {
 
+    //编码器
     @Override
     public void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) throws Exception {
         // 1. 4 字节的魔数
@@ -32,9 +33,13 @@ public class MessageCodec extends ByteToMessageCodec<Message> {
         // 无意义，对齐填充
         out.writeByte(0xff);
         // 6. 获取内容的字节数组
+        //输入流是从某个源读取数据，输出流是数据输出将对象序列化
+        //字节数组输出流，存储序列化后的字节数据
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        //对象输出流，将对象序列化后写入bos中
         ObjectOutputStream oos = new ObjectOutputStream(bos);
         oos.writeObject(msg);
+        //将bos中的字节数据转化为字节数组bytes
         byte[] bytes = bos.toByteArray();
         // 7. 长度
         out.writeInt(bytes.length);
@@ -42,17 +47,20 @@ public class MessageCodec extends ByteToMessageCodec<Message> {
         out.writeBytes(bytes);
     }
 
+    //解码器
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        int magicNum = in.readInt();
-        byte version = in.readByte();
-        byte serializerType = in.readByte();
-        byte messageType = in.readByte();
-        int sequenceId = in.readInt();
-        in.readByte();
-        int length = in.readInt();
+        int magicNum = in.readInt();//out.writeBytes(new byte[]{1, 2, 3, 4});
+        byte version = in.readByte();//out.writeByte(1);
+        byte serializerType = in.readByte();//out.writeByte(0);
+        byte messageType = in.readByte();//out.writeByte(msg.getMessageType());
+        int sequenceId = in.readInt();//out.writeInt(msg.getSequenceId());
+        in.readByte();//读空
+        int length = in.readInt();//out.writeInt(bytes.length);
+        //out.writeBytes(bytes);
         byte[] bytes = new byte[length];
         in.readBytes(bytes, 0, length);
+
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
         Message message = (Message) ois.readObject();
         log.debug("{}, {}, {}, {}, {}, {}", magicNum, version, serializerType, messageType, sequenceId, length);

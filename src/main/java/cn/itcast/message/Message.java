@@ -13,6 +13,7 @@ public abstract class Message implements Serializable {
         return messageClasses.get(messageType);
     }
 
+    //请求序号
     private int sequenceId;
 
     private int messageType;
