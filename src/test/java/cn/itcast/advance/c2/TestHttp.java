@@ -1,17 +1,11 @@
 package cn.itcast.advance.c2;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +25,10 @@ public class TestHttp {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
                     ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
+                    //HttpServerCodec继承了一个http请求和响应的编解码器的联合
+                    //CombinedChannelDuplexHandler<HttpRequestDecoder, HttpResponseEncoder>
                     ch.pipeline().addLast(new HttpServerCodec());
+                    //针对HttpRequest
                     ch.pipeline().addLast(new SimpleChannelInboundHandler<HttpRequest>() {
                         @Override
                         protected void channelRead0(ChannelHandlerContext ctx, HttpRequest msg) throws Exception {
@@ -40,10 +37,11 @@ public class TestHttp {
 
                             // 返回响应
                             DefaultFullHttpResponse response =
+                                    //版本和状态码
                                     new DefaultFullHttpResponse(msg.protocolVersion(), HttpResponseStatus.OK);
 
                             byte[] bytes = "<h1>Hello, world!</h1>".getBytes();
-
+                            //响应体的长度
                             response.headers().setInt(CONTENT_LENGTH, bytes.length);
                             response.content().writeBytes(bytes);
 
@@ -51,7 +49,7 @@ public class TestHttp {
                             ctx.writeAndFlush(response);
                         }
                     });
-                    /*ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+                    /* ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                         @Override
                         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                             log.debug("{}", msg.getClass());
@@ -62,7 +60,7 @@ public class TestHttp {
 
                             }
                         }
-                    });*/
+                    }); */
                 }
             });
             ChannelFuture channelFuture = serverBootstrap.bind(8080).sync();

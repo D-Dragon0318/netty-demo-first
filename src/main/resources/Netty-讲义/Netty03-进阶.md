@@ -837,7 +837,7 @@ TCP/IP 中消息传输基于流的方式，没有边界。
 例如，假设一个中文字符长度为 3，按照上述协议的规则，发送信息方式如下，就不会被接收方弄错意思了
 
 ```
-0f下雨天留客06天留09我不留 f = 3 
+0f下雨天留客06天留09我不留 f = 3 * 5
 ```
 
 
@@ -941,6 +941,8 @@ try {
         @Override
         protected void initChannel(SocketChannel ch) throws Exception {
             ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
+            //HttpServerCodec继承了一个http请求和响应的编解码器的联合
+            //CombinedChannelDuplexHandler<HttpRequestDecoder, HttpResponseEncoder>
             ch.pipeline().addLast(new HttpServerCodec());
             ch.pipeline().addLast(new SimpleChannelInboundHandler<HttpRequest>() {
                 @Override
@@ -950,10 +952,11 @@ try {
 
                     // 返回响应
                     DefaultFullHttpResponse response =
+                        //版本和状态码
                             new DefaultFullHttpResponse(msg.protocolVersion(), HttpResponseStatus.OK);
 
                     byte[] bytes = "<h1>Hello, world!</h1>".getBytes();
-
+                    //响应体的长度
                     response.headers().setInt(CONTENT_LENGTH, bytes.length);
                     response.content().writeBytes(bytes);
 
@@ -986,6 +989,10 @@ try {
 ```
 
 
+
+返回的DefaultHttpRequest只包含请求行和请求头
+
+LastHttpContent$1包含请求体
 
 ### 2.4 自定义协议要素
 
