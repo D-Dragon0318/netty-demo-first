@@ -27,6 +27,7 @@ public class TestRedis {
     zhangsan
      */
     public static void main(String[] args) {
+        //回车和换行
         final byte[] LINE = {13, 10};
         NioEventLoopGroup worker = new NioEventLoopGroup();
         try {
