@@ -1,7 +1,6 @@
 package cn.itcast.client;
 
-import cn.itcast.message.LoginRequestMessage;
-import cn.itcast.message.LoginResponseMessage;
+import cn.itcast.message.*;
 import cn.itcast.protocol.MessageCodecSharable;
 import cn.itcast.protocol.ProcotolFrameDecoder;
 import io.netty.bootstrap.Bootstrap;
@@ -17,7 +16,10 @@ import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,7 +29,17 @@ public class ChatClient {
         NioEventLoopGroup group = new NioEventLoopGroup();
         LoggingHandler LOGGING_HANDLER = new LoggingHandler(LogLevel.DEBUG);
         MessageCodecSharable MESSAGE_CODEC = new MessageCodecSharable();
+        //并发工具类变量，用于多线程间的协调与状态管理
+        /* CountDownLatch 是一个并发计数器工具类，允许一个或多个线程等待其他线程完成一系列操作。
+        初始化时设置了一个计数值（本例中为1）。
+        在这个上下文中，WAIT_FOR_LOGIN 可能用于阻塞某些线程直到登录过程完成。
+        当登录操作完成时，通过调用 WAIT_FOR_LOGIN.countDown() 方法会将计数减1。
+        如果计数到达0，所有在 await() 方法上等待的线程将被释放继续执行。 */
         CountDownLatch WAIT_FOR_LOGIN = new CountDownLatch(1);
+        /* AtomicBoolean 是一个线程安全的布尔型原子类，用于在高并发环境下提供对布尔值的原子性读写操作，避免了同步块的使用。
+        初始化为 false 表示初始状态未登录。
+        这个变量可以用于快速检查登录状态，且支持原子性的更新操作，
+        比如在登录成功时通过 LOGIN.set(true) 设置为 true，这样可以确保多线程环境下状态的正确性和一致性。 */
         AtomicBoolean LOGIN = new AtomicBoolean(false);
         try {
             Bootstrap bootstrap = new Bootstrap();
@@ -92,6 +104,33 @@ public class ChatClient {
                                     System.out.println("gquit [group name]");
                                     System.out.println("quit");
                                     System.out.println("==================================");
+                                    String command = scanner.nextLine();
+                                    String[] s = command.split(" ");
+                                    switch (s[0]) {
+                                        case "send":
+                                            ctx.writeAndFlush(new ChatRequestMessage(username, s[1], s[2]));
+                                            break;
+                                        case "gsend":
+                                            ctx.writeAndFlush(new GroupChatRequestMessage(username, s[1], s[2]));
+                                            break;
+                                        case "gcreate":
+                                            Set<String> set = new HashSet<>(Arrays.asList(s[2].split(",")));
+                                            set.add(username); // 加入自己
+                                            ctx.writeAndFlush(new GroupCreateRequestMessage(s[1], set));
+                                            break;
+                                        case "gmembers":
+                                            ctx.writeAndFlush(new GroupMembersRequestMessage(s[1]));
+                                            break;
+                                        case "gjoin":
+                                            ctx.writeAndFlush(new GroupJoinRequestMessage(username, s[1]));
+                                            break;
+                                        case "gquit":
+                                            ctx.writeAndFlush(new GroupQuitRequestMessage(username, s[1]));
+                                            break;
+                                        case "quit":
+                                            ctx.channel().close();
+                                            return;
+                                    }
                                 }
                             },"system in").start();
                         }
