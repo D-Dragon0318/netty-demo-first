@@ -2,6 +2,7 @@ package cn.itcast.server;
 
 import cn.itcast.protocol.MessageCodecSharable;
 import cn.itcast.protocol.ProcotolFrameDecoder;
+import cn.itcast.server.handler.ChatRequestMessageHandler;
 import cn.itcast.server.handler.LoginRequestMessageHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -20,6 +21,8 @@ public class ChatServer {
         NioEventLoopGroup worker = new NioEventLoopGroup();
         LoggingHandler LOGGING_HANDLER = new LoggingHandler(LogLevel.DEBUG);
         MessageCodecSharable MESSAGE_CODEC = new MessageCodecSharable();
+        LoginRequestMessageHandler LOGIN_HANDLER = new LoginRequestMessageHandler();
+        ChatRequestMessageHandler CHAT_HANDLER = new ChatRequestMessageHandler();
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.channel(NioServerSocketChannel.class);
@@ -30,7 +33,8 @@ public class ChatServer {
                     ch.pipeline().addLast(new ProcotolFrameDecoder());
                     ch.pipeline().addLast(LOGGING_HANDLER);
                     ch.pipeline().addLast(MESSAGE_CODEC);
-                    ch.pipeline().addLast(new LoginRequestMessageHandler());
+                    ch.pipeline().addLast(LOGIN_HANDLER);
+                    ch.pipeline().addLast(CHAT_HANDLER);
                 }
             });
             Channel channel = serverBootstrap.bind(8080).sync().channel();

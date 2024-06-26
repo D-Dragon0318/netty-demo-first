@@ -18,6 +18,10 @@ public class ChatRequestMessage extends Message {
         this.to = to;
         this.content = content;
     }
+    public ChatRequestMessage(String from, String content) {
+        this.from = from;
+        this.content = content;
+    }
 
     @Override
     public int getMessageType() {
